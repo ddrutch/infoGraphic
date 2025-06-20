@@ -1,5 +1,5 @@
 from google_adk import LlmAgent, Tool
-from travel_concierge.tools import search_hotels
+from travel.tools import search_hotels
 
 hotel_agent = LlmAgent(
     name="hotel_agent",

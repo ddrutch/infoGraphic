@@ -24,7 +24,7 @@ from google.adk.sessions import InMemorySessionService
 from google.adk.tools.agent_tool import AgentTool
 from google.adk.tools.mcp_tool.mcp_toolset import MCPToolset, StdioServerParameters
 from google.genai import types
-from travel_concierge.agent import root_agent
+from travel.agent import root_agent
 
 
 load_dotenv()

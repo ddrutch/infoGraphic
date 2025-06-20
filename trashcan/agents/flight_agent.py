@@ -1,5 +1,5 @@
 from google_adk import LlmAgent, Tool
-from travel_concierge.tools import search_flights
+from travel.tools import search_flights
 
 flight_agent = LlmAgent(
     name="flight_agent",

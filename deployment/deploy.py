@@ -20,7 +20,7 @@ import os
 from absl import app, flags
 from dotenv import load_dotenv
 
-from travel_concierge.agent import root_agent
+from travel.agent import root_agent
 
 from google.adk.sessions import VertexAiSessionService
 
