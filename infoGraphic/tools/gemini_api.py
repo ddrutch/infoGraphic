@@ -122,3 +122,46 @@ def map_tool(key: str, tool_context: ToolContext):
             poi["long"] = result["lng"]
 
     return {"places": pois}  # Return the updated pois
+
+
+
+#======================================================================================================================================================
+#======================================================================================================================================================
+
+"""Google Slides API tools for infographic generator."""
+
+from google.adk.tools import Tool
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+
+# Initialize Google Slides API client
+SCOPES = ['https://www.googleapis.com/auth/presentations']
+CREDENTIALS = service_account.Credentials.from_service_account_file(
+    'credentials.json', scopes=SCOPES)
+service = build('slides', 'v1', credentials=CREDENTIALS)
+
+@Tool
+def create_presentation(title: str) -> str:
+    """Creates a new Google Slides presentation with given title"""
+    presentation = service.presentations().create(
+        body={'title': title}
+    ).execute()
+    return presentation.get('presentationId')
+
+@Tool
+def add_slide(presentation_id: str, layout: str) -> str:
+    """Adds a new slide with specified layout"""
+    requests = [{
+        'createSlide': {
+            'slideLayoutReference': {
+                'predefinedLayout': layout
+            }
+        }
+    }]
+    service.presentations().batchUpdate(
+        presentationId=presentation_id,
+        body={'requests': requests}
+    ).execute()
+    return "Slide added"
+
+# More tool functions...

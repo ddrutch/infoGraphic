@@ -64,7 +64,7 @@ booking_agent = Agent(
 
 # Text Formatting Agent
 TextFormattingAgent = Agent(
-    model="gemini-1.5-flash",
+    model="gemini-2.5-flash",
     name="TextFormattingAgent",
     description="Applies precise styling to text elements",
     instruction=prompt.TEXT_FORMATTING_INSTR,
