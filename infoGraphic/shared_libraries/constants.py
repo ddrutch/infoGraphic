@@ -12,17 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Constants used as keys into ADK's session state."""
+"""Constants for infographic generator."""
 
-SYSTEM_TIME = "_time"
-ITIN_INITIALIZED = "_itin_initialized"
+from enum import Enum
 
-ITIN_KEY = "itinerary"
-PROF_KEY = "user_profile"
+class SocialMediaPlatform(str, Enum):
+    GENERAL = "General"
+    WHATSAPP = "WhatsApp"
+    TWITTER = "Twitter"
+    DISCORD = "Discord"
+    REDDIT = "Reddit"
 
-ITIN_START_DATE = "itinerary_start_date"
-ITIN_END_DATE = "itinerary_end_date"
-ITIN_DATETIME = "itinerary_datetime"
+# Platform-specific dimensions (width, height)
+PLATFORM_DIMENSIONS = {
+    SocialMediaPlatform.GENERAL: (1920, 1080),
+    SocialMediaPlatform.WHATSAPP: (1080, 1920),
+    SocialMediaPlatform.TWITTER: (1200, 675),
+    SocialMediaPlatform.DISCORD: (1080, 720),
+    SocialMediaPlatform.REDDIT: (1080, 1080),
+}
 
-START_DATE = "start_date"
-END_DATE = "end_date"
+# Design constants
+MAX_SLIDES = 10
+MAX_ELEMENTS_PER_SLIDE = 8
+FONT_CHOICES = ["Roboto", "Open Sans", "Montserrat", "Lato", "Poppins"]
+COLOR_PALETTES = {
+    "vibrant": ["#FF6B6B", "#4ECDC4", "#FFE66D", "#1A535C"],
+    "professional": ["#2E4053", "#048BA8", "#99C24D", "#F18F01"],
+    "minimal": ["#FFFFFF", "#F5F5F5", "#E0E0E0", "#212121"]
+}
+
+# API configuration
+MAX_GENERATIVE_IMAGES = 2
+MAX_WEB_IMAGES = 5
+API_RETRY_ATTEMPTS = 2

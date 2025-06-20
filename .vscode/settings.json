@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./travel/shared_libraries"
+    ]
+}

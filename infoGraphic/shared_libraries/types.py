@@ -12,220 +12,96 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Common data schema and types for travel-concierge agents."""
+"""Common data schema and types for infographic generator agents."""
 
-from typing import Optional, Union
-
-from google.genai import types
+from typing import List, Dict, Tuple, Optional, Union
+from enum import Enum
 from pydantic import BaseModel, Field
 
-
-# Convenient declaration for controlled generation.
+# Convenient declaration for controlled generation
 json_response_config = types.GenerateContentConfig(
     response_mime_type="application/json"
 )
 
+class ContentType(str, Enum):
+    TITLE = "title"
+    SUBTITLE = "subtitle"
+    BODY = "body"
+    BULLET = "bullet"
+    IMAGE = "image"
+    CHART = "chart"
 
-class Room(BaseModel):
-    """A room for selection."""
-    is_available: bool = Field(
-        description="Whether the room type is available for selection."
+class ImageSource(str, Enum):
+    WEB = "web"
+    GENERATIVE = "generative"
+
+class ImageAsset(BaseModel):
+    """Represents a visual asset for infographics"""
+    url: str = Field(description="Publicly accessible URL of the image")
+    type: str = Field(description="Asset type: logo/character/background/border")
+    source: ImageSource = Field(description="How the image was sourced")
+    description: str = Field(description="Brief caption for accessibility")
+
+class TextElement(BaseModel):
+    """Represents a text element in the infographic"""
+    content: str = Field(description="Actual text content")
+    style: str = Field(description="Style reference from DesignLayout")
+
+class SlideElement(BaseModel):
+    """Represents an element on a slide"""
+    element_id: str = Field(description="Unique identifier for the element")
+    type: ContentType = Field(description="Type of content element")
+    content: Union[str, ImageAsset] = Field(description="Text or image content")
+    position: Tuple[float, float] = Field(
+        description="Normalized position (x,y) from 0.0 to 1.0"
     )
-    price_in_usd: int = Field(description="The cost of the room selection.")
-    room_type: str = Field(
-        description="Type of room, e.g. Twin with Balcon, King with Ocean View... etc."
-    )
-
-
-class RoomsSelection(BaseModel):
-    """A list of rooms for selection."""
-    rooms: list[Room]
-
-
-class Hotel(BaseModel):
-    """A hotel from the search."""
-    name: str = Field(description="Name of the hotel")
-    address: str = Field(description="Full address of the Hotel")
-    check_in_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    check_out_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
-    thumbnail: str = Field(description="Hotel logo location")
-    price: int = Field(description="Price of the room per night")
-
-
-class HotelsSelection(BaseModel):
-    """A list of hotels from the search."""
-    hotels: list[Hotel]
-
-
-class Seat(BaseModel):
-    """A Seat from the search."""
-    is_available: bool = Field(
-        description="Whether the seat is available for selection."
-    )
-    price_in_usd: int = Field(description="The cost of the seat selection.")
-    seat_number: str = Field(description="Seat number, e.g. 22A, 34F... etc.")
-
-
-class SeatsSelection(BaseModel):
-    """A list of seats from the search."""
-    seats: list[list[Seat]]
-
-
-class AirportEvent(BaseModel):
-    """An Airport event."""
-    city_name: str = Field(description="Name of the departure city")
-    airport_code: str = Field(description="IATA code of the departure airport")
-    timestamp: str = Field(description="ISO 8601 departure or arrival date and time")
-
-
-class Flight(BaseModel):
-    """A Flight search result."""
-    flight_number: str = Field(
-        description="Unique identifier for the flight, like BA123, AA31, etc."
-    )
-    departure: AirportEvent
-    arrival: AirportEvent
-    airlines: list[str] = Field(
-        description="Airline names, e.g., American Airlines, Emirates"
-    )
-    airline_logo: str = Field(description="Airline logo location")
-    price_in_usd: int = Field(description="Flight price in US dollars")
-    number_of_stops: int = Field(description="Number of stops during the flight")
-
-
-class FlightsSelection(BaseModel):
-    """A list of flights from the search."""
-    flights: list[Flight]
-
-
-class Destination(BaseModel):
-    """A destination recommendation."""
-    name: str = Field(description="A Destination's Name")
-    country: str = Field(description="The Destination's Country Name")
-    image: str = Field(description="verified URL to an image of the destination")
-    highlights: str = Field(description="Short description highlighting key features")
-    rating: str = Field(description="Numerical rating (e.g., 4.5)")
-
-
-class DestinationIdeas(BaseModel):
-    """Destinations recommendation."""
-    places: list[Destination]
-
-
-class POI(BaseModel):
-    """A Point Of Interest suggested by the agent."""
-    place_name: str = Field(description="Name of the attraction")
-    address: str = Field(
-        description="An address or sufficient information to geocode for a Lat/Lon"
-    )
-    lat: str = Field(
-        description="Numerical representation of Latitude of the location (e.g., 20.6843)"
-    )
-    long: str = Field(
-        description="Numerical representation of Longitude of the location (e.g., -88.5678)"
-    )
-    review_ratings: str = Field(
-        description="Numerical representation of rating (e.g. 4.8 , 3.0 , 1.0 etc)"
-    )
-    highlights: str = Field(description="Short description highlighting key features")
-    image_url: str = Field(description="verified URL to an image of the destination")
-    map_url: Optional[str] = Field(description="Verified URL to Google Map")
-    place_id: Optional[str] = Field(description="Google Map place_id")
-
-
-class POISuggestions(BaseModel):
-    """Points of interest recommendation."""
-    places: list[POI]
-
-
-class AttractionEvent(BaseModel):
-    """An Attraction."""
-    event_type: str = Field(default="visit")
-    description: str = Field(
-        description="A title or description of the activity or the attraction visit"
-    )
-    address: str = Field(description="Full address of the attraction")
-    start_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    end_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    booking_required: bool = Field(default=False)
-    price: Optional[str] = Field(description="Some events may cost money")
-
-
-class FlightEvent(BaseModel):
-    """A Flight Segment in the itinerary."""
-    event_type: str = Field(default="flight")
-    description: str = Field(description="A title or description of the Flight")
-    booking_required: bool = Field(default=True)
-    departure_airport: str = Field(description="Airport code, i.e. SEA")
-    arrival_airport: str = Field(description="Airport code, i.e. SAN")
-    flight_number: str = Field(description="Flight number, e.g. UA5678")
-    boarding_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
-    seat_number: str = Field(description="Seat Row and Position, e.g. 32A")
-    departure_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    arrival_time: str = Field(description="Time in HH:MM format, e.g. 20:00")
-    price: Optional[str] = Field(description="Total air fare")
-    booking_id: Optional[str] = Field(
-        description="Booking Reference ID, e.g LMN-012-STU"
+    size: Tuple[float, float] = Field(
+        description="Normalized size (width,height) from 0.0 to 1.0"
     )
 
-
-class HotelEvent(BaseModel):
-    """A Hotel Booking in the itinerary."""
-    event_type: str = Field(default="hotel")
-    description: str = Field(description="A name, title or a description of the hotel")
-    address: str = Field(description="Full address of the attraction")
-    check_in_time: str = Field(description="Time in HH:MM format, e.g. 16:00")
-    check_out_time: str = Field(description="Time in HH:MM format, e.g. 15:30")
-    room_selection: str = Field()
-    booking_required: bool = Field(default=True)
-    price: Optional[str] = Field(description="Total hotel price including all nights")
-    booking_id: Optional[str] = Field(
-        description="Booking Reference ID, e.g ABCD12345678"
+class SlideLayout(BaseModel):
+    """Layout definition for a single slide"""
+    background: Optional[str] = Field(
+        description="Background color or image URL"
+    )
+    elements: List[SlideElement] = Field(
+        description="Elements contained in the slide"
     )
 
-
-class ItineraryDay(BaseModel):
-    """A single day of events in the itinerary."""
-    day_number: int = Field(
-        description="Identify which day of the trip this represents, e.g. 1, 2, 3... etc."
+class DesignLayout(BaseModel):
+    """Complete design specification for infographic"""
+    layout_type: str = Field(description="vertical/horizontal/square")
+    color_palette: List[str] = Field(
+        description="Primary color scheme in hex codes"
     )
-    date: str = Field(description="The Date this day YYYY-MM-DD format")
-    events: list[Union[FlightEvent, HotelEvent, AttractionEvent]] = Field(
-        default=[], description="The list of events for the day"
+    fonts: Dict[str, str] = Field(
+        description="Font assignments: heading, body, etc."
     )
-
-
-class Itinerary(BaseModel):
-    """A multi-day itinerary."""
-    trip_name: str = Field(
-        description="Simple one liner to describe the trip. e.g. 'San Diego to Seattle Getaway'"
-    )
-    start_date: str = Field(description="Trip Start Date in YYYY-MM-DD format")
-    end_date: str = Field(description="Trip End Date in YYYY-MM-DD format")
-    origin: str = Field(description="Trip Origin, e.g. San Diego")
-    destination: str = (Field(description="Trip Destination, e.g. Seattle"),)
-    days: list[ItineraryDay] = Field(
-        default_factory=list, description="The multi-days itinerary"
+    slides: List[SlideLayout] = Field(
+        description="Ordered list of slide layouts"
     )
 
+class TextStyle(BaseModel):
+    """Text formatting specification"""
+    font_family: str = Field(description="Font name")
+    font_size: int = Field(description="Font size in points")
+    color: str = Field(description="Text color in hex code")
+    bold: bool = Field(description="Whether text is bold")
+    italic: bool = Field(description="Whether text is italicized")
+    alignment: str = Field(description="LEFT/CENTER/RIGHT")
 
-class UserProfile(BaseModel):
-    """An example user profile."""
-    allergies: list[str] = Field(
-        default=[], description="A list of food allergies to avoid"
+class AnalysisResult(BaseModel):
+    """Output from Content Analysis Agent"""
+    title: str = Field(description="Main title of infographic")
+    subtopics: List[Dict[str, Union[str, List[str]]]] = Field(
+        description="Structured content with headings and points"
     )
-    diet_preference: list[str] = Field(
-        default=[], description="Vegetarian, Vegan... etc."
+    keywords: List[str] = Field(
+        description="Key terms for image sourcing"
     )
-    passport_nationality: str = Field(
-        description="Nationality of traveler, e.g. US Citizen"
+    numerical_data: List[Dict[str, Union[str, float]]] = Field(
+        description="Extracted numbers and statistics"
     )
-    home_address: str = Field(description="Home address of traveler")
-    home_transit_preference: str = Field(
-        description="Preferred mode of transport around home, e.g. drive"
+    style_suggestion: str = Field(
+        description="Recommended design style"
     )
-
-
-class PackingList(BaseModel):
-    """A list of things to pack for the trip."""
-    items: list[str]
